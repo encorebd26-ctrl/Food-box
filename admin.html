@@ -1,36 +1,50 @@
 <!DOCTYPE html>
 <html lang="bn"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#d9500a">
 <meta name="robots" content="noindex">
 <title>অ্যাডমিন — ফুড বক্স নালিতাবাড়ী</title>
-<link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anek+Bangla:wght@500;600;700;800&family=Noto+Sans+Bengali:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#fff8f1;--ink:#231a14;--muted:#7a6350;--b:#e8590c;--card:#fff;--line:#f3dfcf;--ok:#2b8a3e}
-@media(prefers-color-scheme:dark){:root{--bg:#1c1713;--ink:#fff1e6;--muted:#d6bfae;--card:#2a221b;--line:#41352a}}
+:root{--bg:#f6f3ee;--ink:#1c1712;--muted:#645d54;--b:#d9500a;--bt:#b43f06;--card:#fff;--line:#e6e0d6;--ok:#2b8a3e;--fd:"Anek Bangla","Noto Sans Bengali",sans-serif;--fb:"Noto Sans Bengali","Hind Siliguri",sans-serif}
+@media(prefers-color-scheme:dark){:root{--bg:#14120f;--ink:#f4f1ec;--muted:#b9b1a5;--card:#201d19;--line:#38332c;--bt:#ff9a5c;--b:#ff7a2e}}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:"Hind Siliguri",sans-serif;line-height:1.55}
-.w{max-width:760px;margin:0 auto;padding:14px 14px 80px}
-h1{font-size:1.3rem;margin:0}h3{margin:0 0 6px}
-input,select,textarea{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:8px 10px;width:100%}
-.btn{background:var(--b);color:#fff;border:0;border-radius:99px;padding:9px 18px;font:600 .95rem "Hind Siliguri",sans-serif;cursor:pointer}
-.btn.alt{background:transparent;color:var(--ink);border:1px solid var(--line)}
-.btn.sm{padding:5px 12px;font-size:.85rem}
-.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px;margin-bottom:10px}
-.top{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px}
-.tabs{display:flex;gap:6px;overflow-x:auto;margin-bottom:12px;padding-bottom:4px}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 1rem/1.65 var(--fb)}
+.w{max-width:860px;margin:0 auto;padding:14px 14px 90px}
+h1{font:800 1.4rem var(--fd);margin:0}h3{margin:0 0 6px;font-family:var(--fd)}
+input,select,textarea{font:inherit;font-size:16px;color:var(--ink);background:var(--bg);border:1.5px solid var(--line);border-radius:10px;padding:9px 12px;width:100%;min-height:44px}
+input:focus,select:focus,textarea:focus{border-color:var(--b);outline:none;box-shadow:0 0 0 3px #d9500a2e}
+button:focus-visible,a:focus-visible{outline:3px solid var(--b);outline-offset:2px}
+.btn{background:var(--b);color:#fff;border:0;border-radius:99px;padding:10px 20px;min-height:44px;font:600 .98rem var(--fb);cursor:pointer}
+.btn:hover{filter:brightness(1.08)}
+.btn.alt{background:transparent;color:var(--ink);border:1.5px solid var(--line)}
+.btn.alt:hover{border-color:var(--ink);filter:none}
+.btn.sm{padding:6px 14px;min-height:38px;font-size:.9rem}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:12px}
+.top{position:sticky;top:0;z-index:5;display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 0;margin-bottom:6px;background:var(--bg)}
+.tabs{display:flex;gap:6px;overflow-x:auto;margin-bottom:14px;padding-bottom:4px;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
 .tabs button{white-space:nowrap}
-.tabs .on{background:var(--b);color:#fff;border-color:var(--b)}
-.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:12px}
-.stat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px}
-.stat b{display:block;font-size:1.35rem;color:var(--b)}
+.tabs .on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:14px}
+@media(min-width:700px){.stats{grid-template-columns:repeat(4,1fr)}}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 16px;font-size:.92rem;color:var(--muted);font-weight:500}
+.stat b{display:block;font:800 2.1rem/1.25 var(--fd);color:var(--bt);margin-top:2px}
 .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.g2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:6px 0}
-.badge{display:inline-block;border-radius:99px;padding:1px 10px;font-size:.8rem;font-weight:600;background:var(--line)}
-.badge.new{background:#ffe0cc;color:#a63d00}.badge.warn{background:#fff3cd;color:#5a4300}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0}
+.badge{display:inline-block;border-radius:99px;padding:2px 12px;font-size:.84rem;font-weight:600;background:var(--line)}
+.badge.b-new,.badge.new{background:#ffe0cc;color:#a63d00}.badge.warn{background:#fff3cd;color:#5a4300}
+.badge.b-confirmed{background:#dbeafe;color:#1e40af}.badge.b-preparing{background:#fef3c7;color:#854d0e}.badge.b-delivery{background:#e0e7ff;color:#3730a3}
+.badge.b-done{background:#d3f2dc;color:#1d6e38}.badge.b-cancelled{background:#fde2e2;color:#a61b1b}
+.ord{border-left:5px solid var(--line)}
+.ord.s-new{border-left-color:var(--b)}.ord.s-confirmed{border-left-color:#3b82f6}.ord.s-preparing{border-left-color:#eab308}.ord.s-delivery{border-left-color:#6366f1}.ord.s-done{border-left-color:var(--ok)}.ord.s-cancelled{border-left-color:#dc2626;opacity:.75}
+.ord b:first-child{font:800 1.15rem var(--fd)}
+.ord .row b{font-family:var(--fd)}
 small,.mut{color:var(--muted)}
-a{color:var(--b)}
-#toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:99px;display:none;z-index:9}
-label.ck{display:flex;gap:6px;align-items:center;font-size:.9rem}label.ck input{width:auto}
+a{color:var(--bt)}
+#toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:12px 22px;border-radius:99px;display:none;z-index:9;font-weight:500;box-shadow:0 10px 30px -8px #0008}
+label.ck{display:flex;gap:8px;align-items:center;font-size:.95rem}label.ck input{width:auto;min-height:0}
 </style></head><body><div class="w" id="app"></div><div id="toast" role="status"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script>
@@ -39,7 +53,7 @@ const $=id=>document.getElementById(id);
 const esc=x=>String(x==null?"":x).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const bn=n=>String(n).replace(/\d/g,d=>"০১২৩৪৫৬৭৮৯"[d]),tk=n=>"৳"+bn(n);
 const ST={new:"নতুন",confirmed:"কনফার্ম",preparing:"তৈরি হচ্ছে",delivery:"ডেলিভারিতে",done:"সম্পন্ন",cancelled:"বাতিল"};
-let tab="orders",stf="all",db={orders:[],items:[],coupons:[],reviews:[],areas:[],gallery:[]},known=-1,actx=null;
+let tab="orders",stf="all",db={orders:[],items:[],coupons:[],reviews:[],areas:[],gallery:[],customers:[]},known=-1,actx=null;
 function toast(t){const e=$("toast");e.textContent=t;e.style.display="block";clearTimeout(toast.t);toast.t=setTimeout(()=>e.style.display="none",2500)}
 function beep(){try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();[880,1175].forEach((f,i)=>{const o=actx.createOscillator(),g=actx.createGain();o.frequency.value=f;o.connect(g);g.connect(actx.destination);g.gain.setValueAtTime(.2,actx.currentTime+i*.18);g.gain.exponentialRampToValueAtTime(.001,actx.currentTime+i*.18+.16);o.start(actx.currentTime+i*.18);o.stop(actx.currentTime+i*.18+.17)})}catch(e){}}
 const dhaka=d=>new Date(d).toLocaleDateString("en-CA",{timeZone:"Asia/Dhaka"});
@@ -55,15 +69,15 @@ async function boot(){const {data:{session}}=await SB.auth.getSession();if(!sess
  const {data:ok}=await SB.rpc("is_admin");if(!ok){await SB.auth.signOut();return login("এই ইমেইল অ্যাডমিন তালিকায় নেই")}
  await loadAll();render();clearInterval(boot.t);boot.t=setInterval(poll,20000)}
 async function loadAll(){const q=t=>SB.from(t).select("*");
- const [o,i,c,r,a,g]=await Promise.all([q("orders").order("created_at",{ascending:false}).limit(300),q("items").order("sort"),q("coupons"),q("reviews").order("created_at",{ascending:false}),q("delivery_areas").order("id"),q("gallery").order("sort")]);
- db={orders:o.data||[],items:i.data||[],coupons:c.data||[],reviews:r.data||[],areas:a.data||[],gallery:g.data||[]};known=db.orders.length}
+ const [o,i,c,r,a,g,pf]=await Promise.all([q("orders").order("created_at",{ascending:false}).limit(300),q("items").order("sort"),q("coupons"),q("reviews").order("created_at",{ascending:false}),q("delivery_areas").order("id"),q("gallery").order("sort"),q("profiles").order("created_at",{ascending:false})]);
+ db={orders:o.data||[],items:i.data||[],coupons:c.data||[],reviews:r.data||[],areas:a.data||[],gallery:g.data||[],customers:pf.data||[],cerr:pf.error};known=db.orders.length}
 async function poll(){const {count}=await SB.from("orders").select("*",{count:"exact",head:true});
  if(count!=null&&known>=0&&count>known){beep();toast("🔔 নতুন অর্ডার এসেছে!");await loadAll();if(tab==="orders"&&!document.activeElement.matches("input,textarea,select"))render()}}
 
-function render(){const tabs=[["orders","অর্ডার"],["items","খাবার"],["coupons","কুপন"],["areas","ডেলিভারি"],["gallery","গ্যালারি"],["reviews","রিভিউ"]];
+function render(){const tabs=[["orders","অর্ডার"],["customers","কাস্টমার"],["items","খাবার"],["coupons","কুপন"],["areas","ডেলিভারি"],["gallery","গ্যালারি"],["reviews","রিভিউ"]];
  const pend=db.reviews.filter(r=>!r.approved).length;
  $("app").innerHTML=`<div class="top"><h1>🍰 অ্যাডমিন প্যানেল</h1><span class="row"><a href="index.html" class="btn alt sm" style="text-decoration:none;color:inherit">সাইট</a><button class="btn alt sm" id="out">লগআউট</button></span></div>
- <div class="tabs">${tabs.map(([k,l])=>`<button class="btn alt sm ${tab===k?"on":""}" data-tab="${k}">${l}${k==="reviews"&&pend?` (${bn(pend)})`:""}</button>`).join("")}</div><div id="view">${({orders:vOrders,items:vItems,coupons:vCoupons,areas:vAreas,gallery:vGallery,reviews:vReviews})[tab]()}</div>`;
+ <div class="tabs">${tabs.map(([k,l])=>`<button class="btn alt sm ${tab===k?"on":""}" data-tab="${k}">${l}${k==="reviews"&&pend?` (${bn(pend)})`:""}</button>`).join("")}</div><div id="view">${({orders:vOrders,items:vItems,coupons:vCoupons,areas:vAreas,gallery:vGallery,reviews:vReviews,customers:vCustomers})[tab]()}</div>`;
  $("out").onclick=async()=>{await SB.auth.signOut();login()}}
 
 function vOrders(){const td=dhaka(Date.now()),live=db.orders.filter(o=>o.status!=="cancelled");
@@ -71,7 +85,7 @@ function vOrders(){const td=dhaka(Date.now()),live=db.orders.filter(o=>o.status!
  const st=`<div class="stats"><div class="stat">আজকের অর্ডার<b>${bn(today.length)}</b></div><div class="stat">আজকের বিক্রি<b>${tk(today.reduce((a,o)=>a+o.total,0))}</b></div><div class="stat">নতুন (দেখা বাকি)<b>${bn(db.orders.filter(o=>o.status==="new").length)}</b></div><div class="stat">অগ্রিম বাকি<b>${bn(live.filter(o=>o.first_order&&!o.advance_paid&&o.status!=="done").length)}</b></div></div>`;
  const chips=`<div class="tabs">${[["all","সব"],...Object.entries(ST)].map(([k,l])=>`<button class="btn alt sm ${stf===k?"on":""}" data-stf="${k}">${l}</button>`).join("")}</div>`;
  const list=db.orders.filter(o=>stf==="all"||o.status===stf).map(o=>{const ph="88"+o.phone;
- return `<div class="card" data-o="${o.id}"><div class="row" style="justify-content:space-between"><b>${esc(o.code)}</b><span class="badge ${o.status==="new"?"new":""}">${ST[o.status]}</span></div>
+ return `<div class="card ord s-${o.status}" data-o="${o.id}"><div class="row" style="justify-content:space-between"><b>${esc(o.code)}</b><span class="badge b-${o.status}">${ST[o.status]}</span></div>
  <div>${esc(o.name)} · <a href="tel:${esc(o.phone)}">${bn(o.phone)}</a> · <a href="https://wa.me/${ph}" target="_blank" rel="noopener">WhatsApp</a></div>
  <div class="mut">${esc(o.area)}<br>${esc(o.address)}</div>
  <div>📅 ${fmtD(o.deliver_on)} · ${esc(o.slot)}</div>
@@ -98,6 +112,23 @@ const vCoupons=()=>`<button class="btn" data-newc style="margin-bottom:10px">+ �
  <div class="row" style="justify-content:space-between"><label class="ck"><input data-k="active" type="checkbox" ${c.active?"checked":""}>চালু</label><span class="row"><button class="btn sm" data-savec="${esc(c.code)}">সেভ</button><button class="btn alt sm" data-delc="${esc(c.code)}">মুছুন</button></span></div></div>`).join("");
 const vAreas=()=>`<p class="mut">ডেলিভারি চার্জ বদলাতে সংখ্যা বদলে বাইরে ক্লিক করুন।</p>`+db.areas.map(a=>`<div class="card row" style="justify-content:space-between" data-a="${a.id}"><span>${esc(a.union_name)} ইউনিয়ন${a.area_name==="পুরো ইউনিয়ন"?"":" — "+esc(a.area_name)}</span><span class="row"><input data-ch="${a.id}" type="number" value="${a.charge}" style="width:90px" aria-label="চার্জ"><label class="ck"><input data-act="${a.id}" type="checkbox" ${a.active?"checked":""}>চালু</label></span></div>`).join("");
 const vReviews=()=>db.reviews.map(r=>`<div class="card"><b>${esc(r.name)}</b> ${"⭐".repeat(r.rating)} <span class="badge ${r.approved?"":"warn"}">${r.approved?"প্রকাশিত":"অপেক্ষায়"}</span><p style="margin:6px 0">${esc(r.body)}</p><span class="row">${r.approved?`<button class="btn alt sm" data-rv="${r.id}:0">লুকান</button>`:`<button class="btn sm" data-rv="${r.id}:1">অনুমোদন</button>`}<button class="btn alt sm" data-rdel="${r.id}">মুছুন</button></span></div>`).join("")||"<p class=mut>কোনো রিভিউ নেই।</p>";
+
+let cq="";
+const l10=p=>String(p||"").replace(/\D/g,"").slice(-10);
+function custList(){const t=cq.trim().toLowerCase();
+ const list=db.customers.filter(c=>!t||[c.name,c.phone,c.email,c.address].join(" ").toLowerCase().includes(t)).map(c=>{
+  const od=db.orders.filter(o=>l10(o.phone)&&l10(o.phone)===l10(c.phone)&&o.status!=="cancelled"),sum=od.reduce((a,o)=>a+o.total,0);
+  return `<div class="card"><div class="row" style="justify-content:space-between"><b style="font:800 1.1rem var(--fd)">${esc(c.name||"নাম নেই")}</b><span class="badge">${bn(od.length)}টি অর্ডার</span></div>
+ <div><a href="tel:${esc(c.phone)}">${bn(esc(c.phone||"—"))}</a> · <a href="https://wa.me/88${esc(c.phone)}" target="_blank" rel="noopener">WhatsApp</a></div>
+ <div class="mut">${esc(c.email)}</div><div>${esc(c.address||"—")}</div>
+ <small>${esc(c.upzilla||"")}, ${esc(c.zilla||"")} · যোগ দিয়েছেন ${new Date(c.created_at).toLocaleDateString("bn-BD",{timeZone:"Asia/Dhaka",day:"numeric",month:"long",year:"numeric"})}${od.length?` · মোট কেনা ${tk(sum)}`:""}</small></div>`}).join("");
+ return list||`<p class="mut">কোনো কাস্টমার পাওয়া যায়নি।</p>`}
+function vCustomers(){
+ if(db.cerr)return `<div class="card"><b>কাস্টমার টেবিল পাওয়া যায়নি</b><p class="mut">Supabase SQL Editor-এ customers.sql চালান, তারপর পেজ রিলোড করুন।</p></div>`;
+ const td=dhaka(Date.now());
+ return `<div class="stats"><div class="stat">মোট কাস্টমার<b>${bn(db.customers.length)}</b></div><div class="stat">আজ নতুন<b>${bn(db.customers.filter(c=>dhaka(c.created_at)===td).length)}</b></div></div>
+ <input id="cq" type="search" placeholder="নাম, মোবাইল বা ইমেইলে খুঁজুন" value="${esc(cq)}" aria-label="কাস্টমার খুঁজুন" style="margin-bottom:12px"><div id="clist">${custList()}</div>`}
+document.addEventListener("input",e=>{if(e.target.id==="cq"){cq=e.target.value;$("clist").innerHTML=custList()}});
 
 async function mut(p,ok){const {error}=await p;if(error){toast("হয়নি: "+error.message);return false}toast(ok||"সেভ হয়েছে ✔");await loadAll();render();return true}
 const vGallery=()=>`<label class="ck">নতুন ছবি যোগ করুন: <input type="file" accept="image/*" multiple id="galUp"></label><div class="g2" style="margin-top:10px">${db.gallery.map(g=>`<div class="card">${/^https?:/.test(g.url)?`<img src="${esc(g.url)}" alt="" style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:10px">`:`<div class="mut" style="padding:20px 0;text-align:center">🖼️ ${esc(g.url)}</div>`}<button class="btn alt sm" data-delg="${g.id}" style="margin-top:6px;width:100%">মুছুন</button></div>`).join("")}</div>`;
