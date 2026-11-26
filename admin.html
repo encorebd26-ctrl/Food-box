@@ -80,6 +80,13 @@ function render(){const tabs=[["orders","অর্ডার"],["customers","ক�
  <div class="tabs">${tabs.map(([k,l])=>`<button class="btn alt sm ${tab===k?"on":""}" data-tab="${k}">${l}${k==="reviews"&&pend?` (${bn(pend)})`:""}</button>`).join("")}</div><div id="view">${({orders:vOrders,items:vItems,coupons:vCoupons,areas:vAreas,gallery:vGallery,reviews:vReviews,customers:vCustomers})[tab]()}</div>`;
  $("out").onclick=async()=>{await SB.auth.signOut();login()}}
 
+
+/* অর্ডারের আইটেমের ছবি: খাবার তালিকা থেকে খুঁজে আনে */
+let SITEIMG=null;
+async function loadSiteImg(){if(SITEIMG)return;SITEIMG={};try{const r=await fetch("index.html",{cache:"force-cache"});const t=await r.text();const m=t.match(/const IMG\s*=\s*(\{[\s\S]*?\});/);if(m)SITEIMG=JSON.parse(m[1]);if(Object.keys(SITEIMG).length&&tab==="orders")render()}catch(e){}}
+function lineImg(l){const it=db.items.find(x=>(l.id!=null&&x.id===l.id)||(l.item_id!=null&&x.id===l.item_id))||db.items.find(x=>x.name===l.name);
+ const u=it&&it.image_url;if(!u)return"";if(/^(https?:|data:)/.test(u))return u;
+ const k=String(u).split("/").pop();if(SITEIMG&&SITEIMG[k])return SITEIMG[k];if(!SITEIMG)loadSiteImg();return""}
 function vOrders(){const td=dhaka(Date.now()),live=db.orders.filter(o=>o.status!=="cancelled");
  const today=live.filter(o=>dhaka(o.created_at)===td);
  const st=`<div class="stats"><div class="stat">আজকের অর্ডার<b>${bn(today.length)}</b></div><div class="stat">আজকের বিক্রি<b>${tk(today.reduce((a,o)=>a+o.total,0))}</b></div><div class="stat">নতুন (দেখা বাকি)<b>${bn(db.orders.filter(o=>o.status==="new").length)}</b></div><div class="stat">অগ্রিম বাকি<b>${bn(live.filter(o=>o.first_order&&!o.advance_paid&&o.status!=="done").length)}</b></div></div>`;
@@ -89,7 +96,7 @@ function vOrders(){const td=dhaka(Date.now()),live=db.orders.filter(o=>o.status!
  <div>${esc(o.name)} · <a href="tel:${esc(o.phone)}">${bn(o.phone)}</a> · <a href="https://wa.me/${ph}" target="_blank" rel="noopener">WhatsApp</a></div>
  <div class="mut">${esc(o.area)}<br>${esc(o.address)}</div>
  <div>📅 ${fmtD(o.deliver_on)} · ${esc(o.slot)}</div>
- <ul style="margin:6px 0;padding-left:18px">${o.lines.map(l=>`<li>${esc(l.name)}${l.opt?` (${esc(l.opt)})`:""} × ${bn(l.qty)} ${esc(l.unit)}${l.free?` <small>(+${bn(l.free)} ফ্রি)</small>`:""}</li>`).join("")}</ul>
+ <ul style="margin:6px 0;padding:0;list-style:none">${o.lines.map(l=>{const im=lineImg(l);return `<li style="display:flex;align-items:center;gap:10px;margin:6px 0">${im?`<img src="${esc(im)}" alt="" loading="lazy" style="width:56px;height:56px;object-fit:cover;border-radius:10px;flex:none;background:var(--line)">`:`<span style="width:56px;height:56px;border-radius:10px;flex:none;background:var(--line);display:grid;place-items:center;font-size:24px">🍽️</span>`}<span>${esc(l.name)}${l.opt?` (${esc(l.opt)})`:""} × ${bn(l.qty)} ${esc(l.unit)}${l.free?` <small>(+${bn(l.free)} ফ্রি)</small>`:""}</span></li>`}).join("")}</ul>
  ${o.cake_note?`<div>🎂 ${esc(o.cake_note)}</div>`:""}${o.note?`<div class="mut">নোট: ${esc(o.note)}</div>`:""}
  <div>খাবার ${tk(o.subtotal)}${o.discount?` − ছাড় ${tk(o.discount)} (${esc(o.coupon)})`:""} + ডেলিভারি ${tk(o.delivery_fee)} = <b>${tk(o.total)}</b> · ${esc(o.payment)}</div>
  <div class="row" style="margin-top:8px">${o.first_order?`<span class="badge warn">প্রথম অর্ডার</span><label class="ck"><input type="checkbox" data-adv="${o.id}" ${o.advance_paid?"checked":""}>অগ্রিম এসেছে</label>`:""}
