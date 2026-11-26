@@ -69,6 +69,19 @@ label{display:block;font-weight:600;margin:14px 0 6px;font-size:.96rem}
 .card{background:var(--card);border:1px solid var(--line);border-radius:20px;overflow:hidden;display:flex;flex-direction:column;box-shadow:var(--sh)}
 .pic{background:var(--line);aspect-ratio:1;overflow:hidden}
 .pic img.ph{width:100%;height:100%;object-fit:cover;display:block}
+.pic.multi{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none}.pic.multi::-webkit-scrollbar{display:none}.pic.multi img.ph{flex:0 0 100%;scroll-snap-align:center}
+.card[data-open]{cursor:pointer}
+#pd{position:fixed;inset:0;background:var(--bg);z-index:30;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+#pd[hidden]{display:none}
+.pdtop{position:sticky;top:0;z-index:3;display:flex;justify-content:space-between;align-items:center;gap:8px;padding:calc(8px + env(safe-area-inset-top,0px)) 14px 8px;background:var(--bg);border-bottom:1px solid var(--line)}
+.pdtop .btn{min-height:42px;padding:8px 18px}
+.pdwrap{max-width:720px;margin:0 auto;padding-bottom:calc(30px + env(safe-area-inset-bottom,0px))}
+.pdimgs{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;aspect-ratio:1;background:var(--line);scrollbar-width:none}
+.pdimgs::-webkit-scrollbar{display:none}
+.pdimgs img,.pdimgs .em{flex:0 0 100%;width:100%;height:100%;object-fit:cover;scroll-snap-align:center;display:grid;place-items:center;font-size:90px}
+.pdcnt{position:relative;margin:-40px 12px 0 auto;width:fit-content;background:#000a;color:#fff;border-radius:99px;padding:2px 12px;font-size:.85rem}
+.pdinfo{padding:16px 18px}.pdinfo h2{font-size:1.5rem;margin-bottom:4px}
+.pdmore{padding:0 14px}.pdmore h3{font-size:1.2rem;margin:10px 4px 12px}
 .pic .em{height:100%;display:grid;place-items:center;font-size:64px}
 .body{padding:14px 14px 16px;display:flex;flex-direction:column;gap:7px;flex:1}
 .body h3{font-size:1.12rem;font-weight:700}
@@ -296,20 +309,42 @@ $("navLogo").src=LOGO;$("footLogo").src=LOGO;
 let items=[],flat=[],gallery=[],cart=[],form={first:"yes",pay:"বিকাশ"},cur="সব",q="";
 const catsF=()=>["সব",...new Set(items.map(c=>c.cat))];
 function drawFilters(){$("filters").innerHTML=catsF().map(t=>`<button class="chip" aria-pressed="${t===cur}" data-t="${esc(t)}"><span>${esc(t)}</span><em>${bn(t==="সব"?items.length:items.filter(c=>c.cat===t).length)}</em></button>`).join("")}
-function draw(){$("menuTitle").textContent=cur==="সব"?"আজকের মেনু":cur;$("grid").innerHTML=items.map((c,i)=>({c,i})).filter(o=>(cur==="সব"||o.c.cat===cur)&&(!q||o.c.n.includes(q))).map(({c,i})=>`
-<article class="card"><div class="pic" style="--bgc:#fff0d2">${c.img?`<img class="ph" src="${esc(imgSrc(c.img))}" alt="${esc(c.n)}" loading="lazy">`:`<div class="em" aria-hidden="true">🍽️</div>`}</div>
+const cardHTML=(c,i)=>`
+<article class="card" data-open="${i}"><div class="pic${c.imgs&&c.imgs.length>1?" multi":""}" style="--bgc:#fff0d2">${c.img?(c.imgs.length>1?c.imgs.map(u=>`<img class="ph" src="${esc(imgSrc(u))}" alt="${esc(c.n)}" loading="lazy">`).join(""):`<img class="ph" src="${esc(imgSrc(c.img))}" alt="${esc(c.n)}" loading="lazy">`):`<div class="em" aria-hidden="true">🍽️</div>`}</div>
 <div class="body"><h3>${esc(c.n)}</h3><p>${esc(c.d)}</p>
 ${c.fp?`<span class="tag">${bn(c.fp)} পিসে ১ পিস ফ্রি</span>`:""}
 <div class="row"><span class="price">${tk(c.p)}<small style="font-size:.8rem;font-weight:400;color:var(--muted)"> / ${esc(c.u)}</small></span>
 ${c.opts?`<select data-o="${i}" aria-label="${esc(c.n)} ধরন">${c.opts.map((o,k)=>`<option value="${k}">${esc(o)}</option>`).join("")}</select>`:""}</div>
 <p>সর্বনিম্ন: ${bn(c.min)} ${esc(c.u)}</p>
-<button class="btn" data-add="${i}">কার্টে যোগ করুন</button></div></article>`).join("")||"<p>কিছু পাওয়া যায়নি।</p>"}
+<button class="btn" data-add="${i}">কার্টে যোগ করুন</button></div></article>`;
+function draw(){$("menuTitle").textContent=cur==="সব"?"আজকের মেনু":cur;$("grid").innerHTML=items.map((c,i)=>({c,i})).filter(o=>(cur==="সব"||o.c.cat===cur)&&(!q||o.c.n.includes(q))).map(({c,i})=>cardHTML(c,i)).join("")||"<p>কিছু পাওয়া যায়নি।</p>"}
 $("filters").onclick=e=>{const b=e.target.closest("[data-t]");if(!b)return;cur=b.dataset.t;drawFilters();draw()};
 $("q").oninput=e=>{q=e.target.value.trim();draw()};
-$("grid").onclick=e=>{const i=e.target.dataset.add;if(i===undefined)return;
- const s=$("grid").querySelector(`select[data-o="${i}"]`),o=s?+s.value:-1;
+function addTo(i,root,btn){const s=root.querySelector(`select[data-o="${i}"]`),o=s?+s.value:-1;
  const l=cart.find(x=>x.i==i&&x.o==o);l?l.q++:cart.push({i:+i,o,q:items[i].min});
- updateBar();e.target.textContent="✔ যোগ হয়েছে";setTimeout(()=>e.target.textContent="কার্টে যোগ করুন",1200)};
+ updateBar();btn.textContent="✔ যোগ হয়েছে";setTimeout(()=>btn.textContent="কার্টে যোগ করুন",1200)}
+$("grid").onclick=e=>{const a=e.target.closest("[data-add]");if(a)return addTo(a.dataset.add,$("grid"),a);
+ if(e.target.closest("select"))return;const c=e.target.closest("[data-open]");if(c)pdOpen(+c.dataset.open)};
+/* পণ্যের বিস্তারিত পাতা (দারাজের মতো): উপরে পণ্য, নিচে আরও পণ্য */
+function pdOpen(i,push=true){const c=items[i];if(!c)return;
+ const imgs=c.imgs.length?c.imgs:[];
+ const more=items.map((m,k)=>({m,k})).filter(o=>o.k!==i).sort((p,q2)=>(q2.m.cat===c.cat)-(p.m.cat===c.cat));
+ $("pdBody").innerHTML=`<div class="pdimgs" id="pdImgs">${imgs.length?imgs.map(u=>`<img src="${esc(imgSrc(u))}" alt="${esc(c.n)}">`).join(""):`<div class="em" aria-hidden="true">🍽️</div>`}</div>${imgs.length>1?`<div class="pdcnt" id="pdCnt">১/${bn(imgs.length)}</div>`:""}
+ <div class="pdinfo"><h2>${esc(c.n)}</h2><div class="price" style="font-size:1.5rem">${tk(c.p)}<small style="font-size:.85rem;font-weight:400;color:var(--muted)"> / ${esc(c.u)}</small></div>
+ ${c.fp?`<span class="tag">${bn(c.fp)} পিসে ১ পিস ফ্রি</span>`:""}
+ ${c.d?`<p>${esc(c.d)}</p>`:""}<p style="color:var(--muted)">সর্বনিম্ন: ${bn(c.min)} ${esc(c.u)}</p>
+ ${c.opts?`<select data-o="${i}" aria-label="${esc(c.n)} ধরন" style="margin-bottom:10px">${c.opts.map((o,k)=>`<option value="${k}">${esc(o)}</option>`).join("")}</select>`:""}
+ <button class="btn" data-add="${i}" style="width:100%">কার্টে যোগ করুন</button></div>
+ <div class="pdmore"><h3>আরও খাবার</h3><div class="grid" id="pdGrid">${more.map(o=>cardHTML(o.m,o.k)).join("")}</div></div>`;
+ const im=$("pdImgs"),ct=$("pdCnt");if(ct)im.onscroll=()=>{ct.textContent=bn(Math.round(im.scrollLeft/im.clientWidth)+1)+"/"+bn(imgs.length)};
+ $("pd").hidden=false;$("pd").scrollTop=0;document.body.style.overflow="hidden";
+ if(push&&!(history.state&&history.state.pd))history.pushState({pd:1},"")}
+function pdClose(fromPop){$("pd").hidden=true;document.body.style.overflow="";if(!fromPop&&history.state&&history.state.pd)history.back()}
+window.addEventListener("popstate",()=>{if(!$("pd").hidden)pdClose(true)});
+$("pd").onclick=e=>{if(e.target.closest("[data-pdclose]"))return pdClose();
+ if(e.target.closest("[data-pdcart]")){pdClose();return $("cartBar").click()}
+ const a=e.target.closest("[data-add]");if(a)return addTo(a.dataset.add,$("pd"),a);
+ if(e.target.closest("select"))return;const c=e.target.closest("[data-open]");if(c)pdOpen(+c.dataset.open,false)};
 function renderGal(){$("galSec").hidden=!gallery.length;$("gal").innerHTML=gallery.map(u=>`<img src="${esc(imgSrc(u))}" alt="গ্যালারির ছবি" loading="lazy">`).join("")}
 function renderRev(list){$("revList").innerHTML=list.length?list.map(r=>`<div class="item" style="display:block"><b>${esc(r.name)}</b> ${"⭐".repeat(r.rating)}<br>${esc(r.body)}</div>`).join(""):"<p style=\"color:var(--muted)\">এখনও কোনো মতামত নেই।</p>"}
 function renderDel(){const by={};flat.forEach(x=>{(by[x.u]=by[x.u]||[]).push(x)});
@@ -318,7 +353,7 @@ $("customBtn").onclick=()=>window.open("https://wa.me/"+PHONE+"?text="+encodeURI
 async function load(){
  const [a,b,c,d]=await Promise.all([SB.from("items").select("*").order("sort"),SB.from("delivery_areas").select("*").eq("active",true).order("id"),SB.from("gallery").select("url").order("sort"),SB.from("reviews").select("name,rating,body").eq("approved",true).order("created_at",{ascending:false}).limit(10)]);
  if(a.error){$("grid").innerHTML="<p>মেনু লোড হয়নি। ইন্টারনেট দেখে আবার চেষ্টা করুন।</p>";return}
- items=a.data.map(r=>({id:r.id,n:r.name,cat:r.category,p:r.price,u:r.unit,min:r.min_qty,d:r.description||"",img:r.image_url,opts:r.options&&r.options.length?r.options:null,fp:r.free_per}));
+ items=a.data.map(r=>({id:r.id,n:r.name,cat:r.category,p:r.price,u:r.unit,min:r.min_qty,d:r.description||"",img:String(r.image_url||"").split("|")[0],imgs:String(r.image_url||"").split("|").filter(Boolean),opts:r.options&&r.options.length?r.options:null,fp:r.free_per}));
  flat=(b.data||[]).map(r=>({id:r.id,u:r.union_name,c:r.charge,lbl:r.union_name+" ইউনিয়ন"+(r.area_name==="পুরো ইউনিয়ন"?"":" — "+r.area_name)}));
  gallery=(c.data||[]).map(x=>x.url);
  drawFilters();drawCats();draw();renderGal();renderRev(d.data||[]);renderDel()}
@@ -525,4 +560,5 @@ $("langBtn").onclick=()=>setLang(lang==="en"?"bn":"en");setLang(lang);
 
 load();
 </script>
+<div id="pd" hidden role="dialog" aria-label="খাবারের বিবরণ"><div class="pdtop"><button class="btn alt" data-pdclose style="background:transparent;color:var(--ink);border:1.5px solid var(--line)">← পিছনে</button><button class="btn" data-pdcart>🛒 কার্ট দেখুন</button></div><div class="pdwrap" id="pdBody"></div></div>
 </body></html>

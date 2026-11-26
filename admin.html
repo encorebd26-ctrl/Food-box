@@ -87,6 +87,9 @@ async function loadSiteImg(){if(SITEIMG)return;SITEIMG={};try{const r=await fetc
 function lineImg(l){const it=db.items.find(x=>(l.id!=null&&x.id===l.id)||(l.item_id!=null&&x.id===l.item_id))||db.items.find(x=>x.name===l.name);
  const u=it&&it.image_url;if(!u)return"";if(/^(https?:|data:)/.test(u))return u;
  const k=String(u).split("/").pop();if(SITEIMG&&SITEIMG[k])return SITEIMG[k];if(!SITEIMG)loadSiteImg();return""}
+
+const imgList=it=>String(it.image_url||"").split("|").filter(Boolean);
+function resolveImg(u){if(/^(https?:|data:)/.test(u))return u;const k=String(u).split("/").pop();if(SITEIMG&&SITEIMG[k])return SITEIMG[k];if(!SITEIMG)loadSiteImg();return""}
 function vOrders(){const td=dhaka(Date.now()),live=db.orders.filter(o=>o.status!=="cancelled");
  const today=live.filter(o=>dhaka(o.created_at)===td);
  const st=`<div class="stats"><div class="stat">আজকের অর্ডার<b>${bn(today.length)}</b></div><div class="stat">আজকের বিক্রি<b>${tk(today.reduce((a,o)=>a+o.total,0))}</b></div><div class="stat">নতুন (দেখা বাকি)<b>${bn(db.orders.filter(o=>o.status==="new").length)}</b></div><div class="stat">অগ্রিম বাকি<b>${bn(live.filter(o=>o.first_order&&!o.advance_paid&&o.status!=="done").length)}</b></div></div>`;
@@ -110,8 +113,8 @@ function itemCard(it){return `<div class="card" data-i="${it.id}"><input data-k=
  <div class="g2"><input data-k="price" type="number" value="${it.price}" aria-label="দাম" placeholder="দাম"><input data-k="min_qty" type="number" value="${it.min_qty}" aria-label="সর্বনিম্ন" placeholder="সর্বনিম্ন পরিমাণ"></div>
  <div class="g2"><input data-k="free_per" type="number" value="${it.free_per}" aria-label="ফ্রি অফার" placeholder="কয় পিসে ১ ফ্রি (০ = নেই)"><input data-k="sort" type="number" value="${it.sort}" aria-label="ক্রম" placeholder="ক্রম"></div>
  <input data-k="description" value="${esc(it.description)}" aria-label="বর্ণনা" placeholder="বর্ণনা"><input data-k="options" value="${esc((it.options||[]).join(", "))}" aria-label="ধরন" placeholder="ধরন (কমা দিয়ে, যেমন: ঝাল, মিষ্টি)" style="margin-top:6px">
- ${/^https?:/.test(it.image_url||"")?`<img src="${esc(it.image_url)}" alt="" style="width:90px;height:70px;object-fit:cover;border-radius:10px;margin-top:6px">`:(it.image_url?`<small class="mut">ছবি: সাইটে বসানো আছে (${esc(it.image_url)})</small>`:"")}
- <label class="ck" style="margin-top:6px">ছবি: <input data-k="file" type="file" accept="image/*"></label>
+ <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:6px">${imgList(it).map((u,n)=>{const src=resolveImg(u);return `<div style="position:relative">${src?`<img src="${esc(src)}" alt="" style="width:70px;height:70px;object-fit:cover;border-radius:10px;display:block">`:`<span class="mut" style="width:70px;height:70px;display:grid;place-items:center;background:var(--line);border-radius:10px;font-size:11px;text-align:center">সাইটে বসানো</span>`}<button type="button" data-rmimg="${it.id}:${n}" aria-label="ছবি সরান" style="position:absolute;top:-6px;right:-6px;width:24px;height:24px;border-radius:50%;border:0;background:#dc2626;color:#fff;font-size:15px;line-height:1;cursor:pointer;padding:0">×</button></div>`}).join("")}</div>
+ <label class="ck" style="margin-top:6px">ছবি যোগ করুন (একসাথে অনেকগুলো): <input data-k="file" type="file" accept="image/*" multiple></label>
  <div class="row" style="justify-content:space-between;margin-top:8px"><label class="ck"><input data-k="hidden" type="checkbox" ${it.hidden?"checked":""}>লুকানো (স্টক নেই)</label><span class="row"><button class="btn sm" data-save="${it.id}">সেভ</button><button class="btn alt sm" data-del="${it.id}">মুছুন</button></span></div></div>`}
 const vItems=()=>`<button class="btn" data-newitem style="margin-bottom:10px">+ নতুন খাবার</button>`+db.items.map(itemCard).join("");
 const vCoupons=()=>`<button class="btn" data-newc style="margin-bottom:10px">+ নতুন কুপন</button>`+db.coupons.map(c=>`<div class="card" data-c="${esc(c.code)}"><div class="g2"><input data-k="code" value="${esc(c.code)}" aria-label="কোড" disabled><select data-k="kind"><option value="pct" ${c.kind==="pct"?"selected":""}>শতাংশ %</option><option value="flat" ${c.kind==="flat"?"selected":""}>নির্দিষ্ট টাকা</option></select></div>
@@ -157,9 +160,10 @@ document.addEventListener("click",async e=>{const t=e.target,d=t.dataset;if(!d)r
  if(d.save){const b=document.querySelector(`[data-i="${d.save}"]`),g=k=>b.querySelector(`[data-k="${k}"]`);
   const opts=g("options").value.split(",").map(s=>s.trim()).filter(Boolean);
   const row={name:g("name").value.trim(),category:g("category").value.trim(),unit:g("unit").value.trim(),price:+g("price").value,min_qty:+g("min_qty").value||1,free_per:+g("free_per").value||0,sort:+g("sort").value||0,description:g("description").value.trim(),options:opts.length?opts:null,hidden:g("hidden").checked};
-  const f=g("file").files[0];t.disabled=true;
-  if(f){try{row.image_url=await upImg(f)}catch(x){t.disabled=false;return toast("ছবি আপলোড হয়নি: "+x.message)}}
+  const fs=[...g("file").files];t.disabled=true;
+  if(fs.length){try{toast("ছবি আপলোড হচ্ছে…");const cur=imgList(db.items.find(x=>String(x.id)===String(d.save))||{}),add=[];for(const f of fs)add.push(await upImg(f));row.image_url=cur.concat(add).join("|")}catch(x){t.disabled=false;return toast("ছবি আপলোড হয়নি: "+x.message)}}
   return mut(SB.from("items").update(row).eq("id",d.save))}
+ if(d.rmimg){const [id,n]=d.rmimg.split(":"),it=db.items.find(x=>String(x.id)===id);if(!it||!confirm("এই ছবিটা সরাবেন?"))return;const l=imgList(it);l.splice(+n,1);return mut(SB.from("items").update({image_url:l.length?l.join("|"):null}).eq("id",id),"ছবি সরানো হয়েছে")}
  if(d.delg){if(confirm("ছবিটা মুছবেন?"))mut(SB.from("gallery").delete().eq("id",d.delg),"মুছেছে");return}
  if(d.newc){const code=(prompt("কুপন কোড লিখুন (ইংরেজিতে)")||"").trim().toUpperCase();if(code)mut(SB.from("coupons").insert({code,kind:"pct",value:10,min_order:0}),"যোগ হয়েছে");return}
  if(d.delc){if(confirm("কুপন মুছবেন?"))mut(SB.from("coupons").delete().eq("code",d.delc),"মুছেছে");return}
