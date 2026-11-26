@@ -402,12 +402,15 @@ async function place(){grab();const f=form;let m="";
  else if(f.date<minDate())m=hasCake()?"কেক কমপক্ষে ১ দিন আগে অর্ডার করতে হবে। আগামীকাল বা তার পরের তারিখ দিন।":"আজ বা পরের কোনো তারিখ দিন।";
  if(m){$("err").textContent=m;return}
  const btn=$("confirm");btn.disabled=true;btn.textContent="অর্ডার হচ্ছে…";
+ let waWin=null;try{waWin=window.open("about:blank","_blank");if(waWin)waWin.opener=null}catch(e){}
  const a=flat[f.area];
  const {data,error}=await SB.rpc("place_order",{p:{name:f.name,phone:ph,area_id:a.id,address:f.addr,date:f.date,slot:f.time,items:cart.map(l=>({id:items[l.i].id,qty:l.q,opt:l.o>=0?items[l.i].opts[l.o]:null})),coupon:f.coupon||"",payment:f.pay,note:f.note,cake_note:f.msg||""}});
- if(error||!data){btn.disabled=false;btn.textContent="অর্ডার কনফার্ম করুন";$("err").textContent=(error&&error.message)||"অর্ডার হয়নি, আবার চেষ্টা করুন।";return}
+ if(error||!data){try{if(waWin)waWin.close()}catch(e){}btn.disabled=false;btn.textContent="অর্ডার কনফার্ম করুন";$("err").textContent=(error&&error.message)||"অর্ডার হয়নি, আবার চেষ্টা করুন।";return}
  const dd=new Date(f.date+"T00:00").toLocaleDateString("bn-BD",{day:"numeric",month:"long",year:"numeric",weekday:"long"});
  const lines=cart.map((l,k)=>`${bn(k+1)}. ${nm(l)} × ${bn(l.q)} ${items[l.i].u}${free(l)?` (+${bn(free(l))} পিস ফ্রি)`:""} = ${tk(line(l))}`).join("\n");
  const msg=`অর্ডার আইডি: ${data.code}\n\n${lines}\n\n${disc()?"কুপন ("+f.coupon+"): −"+tk(disc())+"\n":""}ডেলিভারি (${a.lbl}): ${tk(a.c)}\nমোট: ${tk(data.total)}\n\nনাম: ${f.name}\nমোবাইল: ${bn(ph)}\nঠিকানা: ${f.addr}\nতারিখ: ${dd}\nসময়: ${f.time}\n${f.msg?"কেকের ডিজাইন/লেখা: "+f.msg+"\n":""}প্রথমবারের অর্ডার: ${data.first_order?"হ্যাঁ (অগ্রিম পেমেন্ট প্রয়োজন)":"না"}\nপেমেন্ট: ${f.pay}`;
+ const waUrl="https://wa.me/"+PHONE+"?text="+encodeURIComponent(msg);
+ try{if(waWin)waWin.location.href=waUrl;else window.location.href=waUrl}catch(e){}
  cart=[];form={first:"no",pay:"বিকাশ",name:f.name,phone:f.phone,addr:f.addr,area:f.area};updateBar();
  $("panel").innerHTML=`<div class="done"><div class="tick">🎉</div><h2 style="justify-content:center">অর্ডার হয়েছে!</h2>
  <p>আপনার অর্ডার আইডি: <b>${esc(data.code)}</b>। এটা লিখে রাখুন, সাইটে ট্র্যাক করতে পারবেন।<br>${data.first_order?"<b>প্রথম অর্ডার, তাই অগ্রিম পেমেন্ট না দেওয়া পর্যন্ত কনফার্ম হবে না।</b> বিকাশ/নগদ: ০১৯৮৪-৫১২৩৮৩। টাকা পাঠিয়ে ট্রানজেকশন আইডি WhatsApp-এ জানান।":"আমরা দেখে কনফার্ম করে জানাব।"}</p>
