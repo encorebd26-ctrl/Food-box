@@ -116,7 +116,13 @@ function itemCard(it){return `<div class="card" data-i="${it.id}"><input data-k=
  <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:6px">${imgList(it).map((u,n)=>{const src=resolveImg(u);return `<div style="position:relative">${src?`<img src="${esc(src)}" alt="" style="width:70px;height:70px;object-fit:cover;border-radius:10px;display:block">`:`<span class="mut" style="width:70px;height:70px;display:grid;place-items:center;background:var(--line);border-radius:10px;font-size:11px;text-align:center">সাইটে বসানো</span>`}<button type="button" data-rmimg="${it.id}:${n}" aria-label="ছবি সরান" style="position:absolute;top:-6px;right:-6px;width:24px;height:24px;border-radius:50%;border:0;background:#dc2626;color:#fff;font-size:15px;line-height:1;cursor:pointer;padding:0">×</button></div>`}).join("")}</div>
  <label class="ck" style="margin-top:6px">ছবি যোগ করুন (একসাথে অনেকগুলো): <input data-k="file" type="file" accept="image/*" multiple></label>
  <div class="row" style="justify-content:space-between;margin-top:8px"><label class="ck"><input data-k="hidden" type="checkbox" ${it.hidden?"checked":""}>লুকানো (স্টক নেই)</label><span class="row"><button class="btn sm" data-save="${it.id}">সেভ</button><button class="btn alt sm" data-del="${it.id}">মুছুন</button></span></div></div>`}
-const vItems=()=>`<button class="btn" data-newitem style="margin-bottom:10px">+ নতুন খাবার</button>`+db.items.map(itemCard).join("");
+const vItems=()=>`<button class="btn" data-newitem style="margin-bottom:10px">+ নতুন খাবার</button>
+<div class="card" style="margin-bottom:12px"><b>📸 একসাথে অনেক খাবার যোগ করুন</b>
+<p class="mut" style="margin:4px 0 8px">যতগুলো ছবি বাছবেন, ততগুলো আলাদা খাবার তৈরি হবে (প্রতি ছবিতে একটা)।</p>
+<div class="g2"><input id="bkName" value="ভ্যানিলা কেক" aria-label="নামের শুরু" placeholder="নাম (পরে ১, ২, ৩… বসবে)"><input id="bkCat" value="কেক" aria-label="ক্যাটাগরি" placeholder="ক্যাটাগরি"></div>
+<div class="g2" style="margin-top:6px"><input id="bkPrice" type="number" value="399" aria-label="দাম" placeholder="দাম"><input id="bkUnit" value="পিস" aria-label="একক" placeholder="একক"></div>
+<label class="ck" style="margin-top:6px">ছবি বাছুন: <input id="bkFiles" type="file" accept="image/*" multiple></label>
+<button class="btn" data-bulk style="margin-top:8px">সবগুলো যোগ করুন</button></div>`+db.items.map(itemCard).join("");
 const vCoupons=()=>`<button class="btn" data-newc style="margin-bottom:10px">+ নতুন কুপন</button>`+db.coupons.map(c=>`<div class="card" data-c="${esc(c.code)}"><div class="g2"><input data-k="code" value="${esc(c.code)}" aria-label="কোড" disabled><select data-k="kind"><option value="pct" ${c.kind==="pct"?"selected":""}>শতাংশ %</option><option value="flat" ${c.kind==="flat"?"selected":""}>নির্দিষ্ট টাকা</option></select></div>
  <div class="g2"><input data-k="value" type="number" value="${c.value}" aria-label="ছাড়" placeholder="ছাড়"><input data-k="min_order" type="number" value="${c.min_order}" aria-label="ন্যূনতম অর্ডার" placeholder="ন্যূনতম অর্ডার"></div>
  <div class="row" style="justify-content:space-between"><label class="ck"><input data-k="active" type="checkbox" ${c.active?"checked":""}>চালু</label><span class="row"><button class="btn sm" data-savec="${esc(c.code)}">সেভ</button><button class="btn alt sm" data-delc="${esc(c.code)}">মুছুন</button></span></div></div>`).join("");
@@ -155,7 +161,14 @@ document.addEventListener("click",async e=>{const t=e.target,d=t.dataset;if(!d)r
  if(d.tab){tab=d.tab;return render()}
  if(d.stf){stf=d.stf;return render()}
  if(d.pr)return printOrder(db.orders.find(o=>o.id===d.pr));
- if(d.newitem)return mut(SB.from("items").insert({name:"নতুন খাবার",category:"অন্যান্য",price:100,unit:"পিস",sort:99}),"যোগ হয়েছে");
+ if("bulk" in d){const fs=[...document.getElementById("bkFiles").files],v=i=>document.getElementById(i).value.trim();
+  if(!fs.length)return toast("আগে ছবি বাছুন");if(!v("bkName")||!(+v("bkPrice")>0))return toast("নাম আর দাম দিন");
+  t.disabled=true;let n=0;const bn2=s=>String(s).replace(/\d/g,c=>"০১২৩৪৫৬৭৮৯"[c]);
+  for(const f of fs){try{toast("যোগ হচ্ছে "+(n+1)+"/"+fs.length+"…");const url=await upImg(f);
+   const {error}=await SB.from("items").insert({name:v("bkName")+" "+bn2(n+1),category:v("bkCat")||"অন্যান্য",price:+v("bkPrice"),unit:v("bkUnit")||"পিস",sort:n+1,image_url:url});
+   if(error)throw error;n++}catch(x){toast("থেমে গেছে ("+n+" টা হয়েছে): "+x.message);break}}
+  t.disabled=false;await loadAll();render();if(n===fs.length)toast(n+" টা খাবার যোগ হয়েছে ✔");return}
+ if("newitem" in d)return mut(SB.from("items").insert({name:"নতুন খাবার",category:"অন্যান্য",price:100,unit:"পিস",sort:99}),"যোগ হয়েছে");
  if(d.del){if(confirm("এই খাবার মুছবেন?"))mut(SB.from("items").delete().eq("id",d.del),"মুছেছে");return}
  if(d.save){const b=document.querySelector(`[data-i="${d.save}"]`),g=k=>b.querySelector(`[data-k="${k}"]`);
   const opts=g("options").value.split(",").map(s=>s.trim()).filter(Boolean);
@@ -165,7 +178,7 @@ document.addEventListener("click",async e=>{const t=e.target,d=t.dataset;if(!d)r
   return mut(SB.from("items").update(row).eq("id",d.save))}
  if(d.rmimg){const [id,n]=d.rmimg.split(":"),it=db.items.find(x=>String(x.id)===id);if(!it||!confirm("এই ছবিটা সরাবেন?"))return;const l=imgList(it);l.splice(+n,1);return mut(SB.from("items").update({image_url:l.length?l.join("|"):null}).eq("id",id),"ছবি সরানো হয়েছে")}
  if(d.delg){if(confirm("ছবিটা মুছবেন?"))mut(SB.from("gallery").delete().eq("id",d.delg),"মুছেছে");return}
- if(d.newc){const code=(prompt("কুপন কোড লিখুন (ইংরেজিতে)")||"").trim().toUpperCase();if(code)mut(SB.from("coupons").insert({code,kind:"pct",value:10,min_order:0}),"যোগ হয়েছে");return}
+ if("newc" in d){const code=(prompt("কুপন কোড লিখুন (ইংরেজিতে)")||"").trim().toUpperCase();if(code)mut(SB.from("coupons").insert({code,kind:"pct",value:10,min_order:0}),"যোগ হয়েছে");return}
  if(d.delc){if(confirm("কুপন মুছবেন?"))mut(SB.from("coupons").delete().eq("code",d.delc),"মুছেছে");return}
  if(d.savec){const b=document.querySelector(`[data-c="${CSS.escape(d.savec)}"]`),g=k=>b.querySelector(`[data-k="${k}"]`);
   return mut(SB.from("coupons").update({kind:g("kind").value,value:+g("value").value,min_order:+g("min_order").value||0,active:g("active").checked}).eq("code",d.savec))}
